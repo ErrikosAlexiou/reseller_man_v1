@@ -27,11 +27,16 @@
             margin-top: 20px;
         }
 
-        .filters select {
+        .filters select,
+        .filters input {
             padding: 10px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ddd;
+        }
+
+        .filters input {
+            width: 200px;
         }
 
         .grid-container {
@@ -100,6 +105,8 @@
                 <option value="today">Today</option>
                 <option value="last7">Last 7 Days</option>
                 <option value="last28">Last 28 Days</option>
+                <option value="allTime">All Time</option>
+                <option value="custom">Custom Range</option>
             </select>
         </div>
         <div>
@@ -108,6 +115,14 @@
                 <!-- Products will be inserted here dynamically -->
             </select>
         </div>
+    </div>
+
+    <!-- Custom Date Range -->
+    <div id="customRange" style="display: none; padding: 20px;">
+        <label for="startDate">Start Date: </label>
+        <input type="date" id="startDate">
+        <label for="endDate">End Date: </label>
+        <input type="date" id="endDate">
     </div>
 
     <!-- Grid of Cards for Metrics -->
@@ -134,6 +149,8 @@
                 // When the dropdown value changes, refresh the data
                 document.getElementById('dateRange').addEventListener('change', updateDashboard);
                 productSelect.addEventListener('change', updateDashboard);
+                document.getElementById('startDate').addEventListener('change', updateDashboard);
+                document.getElementById('endDate').addEventListener('change', updateDashboard);
 
                 // Initial load
                 updateDashboard();
@@ -141,13 +158,22 @@
                 function updateDashboard() {
                     const selectedDateRange = document.getElementById('dateRange').value;
                     const selectedProduct = productSelect.value;
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+
+                    // Handle custom date range visibility
+                    if (selectedDateRange === 'custom') {
+                        document.getElementById('customRange').style.display = 'block';
+                    } else {
+                        document.getElementById('customRange').style.display = 'none';
+                    }
 
                     // Calculate metrics based on selected date range and product
-                    const metrics = calculateMetrics(products, selectedDateRange, selectedProduct);
+                    const metrics = calculateMetrics(products, selectedDateRange, selectedProduct, startDate, endDate);
                     renderMetrics(metrics);
                 }
 
-                function calculateMetrics(products, dateRange, productId) {
+                function calculateMetrics(products, dateRange, productId, startDate, endDate) {
                     const metrics = {
                         profit: 0,
                         revenue: 0,
@@ -171,14 +197,17 @@
 
                         // Handle buy transactions (e.g., for revenue and cost)
                         buyTransactions.forEach(transaction => {
-                            // (Optional) You could do specific calculations based on date range here
-                            productRevenue += transaction.quantity * transaction.price;
+                            if (isDateInRange(transaction.date, dateRange, startDate, endDate)) {
+                                productRevenue += transaction.quantity * transaction.price;
+                            }
                         });
 
                         // Handle sell transactions (e.g., for profit and losses)
                         sellTransactions.forEach(transaction => {
-                            productProfit += transaction.quantity * transaction.price;
-                            productQuantitySold += transaction.quantity;
+                            if (isDateInRange(transaction.date, dateRange, startDate, endDate)) {
+                                productProfit += transaction.quantity * transaction.price;
+                                productQuantitySold += transaction.quantity;
+                            }
                         });
 
                         // Calculate loss or any other custom metric
@@ -192,6 +221,36 @@
                     });
 
                     return metrics;
+                }
+
+                function isDateInRange(date, range, startDate, endDate) {
+                    const transactionDate = new Date(date);
+                    const today = new Date();
+                    let startDateObj, endDateObj;
+
+                    if (range === 'today') {
+                        return transactionDate.toDateString() === today.toDateString();
+                    }
+                    if (range === 'last7') {
+                        startDateObj = new Date(today);
+                        startDateObj.setDate(today.getDate() - 7);
+                        return transactionDate >= startDateObj && transactionDate <= today;
+                    }
+                    if (range === 'last28') {
+                        startDateObj = new Date(today);
+                        startDateObj.setDate(today.getDate() - 28);
+                        return transactionDate >= startDateObj && transactionDate <= today;
+                    }
+                    if (range === 'allTime') {
+                        return true; // No date filtering
+                    }
+                    if (range === 'custom') {
+                        startDateObj = new Date(startDate);
+                        endDateObj = new Date(endDate);
+                        return transactionDate >= startDateObj && transactionDate <= endDateObj;
+                    }
+
+                    return false;
                 }
 
                 function renderMetrics(metrics) {
