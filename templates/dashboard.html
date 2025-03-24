@@ -20,10 +20,25 @@
             text-align: center;
         }
 
-        .content {
-            padding: 30px;
+        .filters {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .filters select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 20px;
         }
 
         .card {
@@ -32,7 +47,6 @@
             border-radius: 8px;
             padding: 20px;
             text-align: center;
-            width: 200px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
@@ -40,18 +54,9 @@
             margin-bottom: 10px;
         }
 
-        .card a {
-            display: block;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .card a:hover {
-            background-color: #0056b3;
+        .card p {
+            font-size: 20px;
+            font-weight: bold;
         }
 
         /* Bottom Navigation Bar Styles */
@@ -88,22 +93,131 @@
         <h1>Dashboard</h1>
     </div>
 
-    <div class="content">
-        <div class="card">
-            <h3>Total Products</h3>
-            <p id="productCount">Loading...</p>
-            <a href="/products">Manage Products</a>
+    <!-- Filters for Date Range and Product Selection -->
+    <div class="filters">
+        <div>
+            <select id="dateRange">
+                <option value="today">Today</option>
+                <option value="last7">Last 7 Days</option>
+                <option value="last28">Last 28 Days</option>
+            </select>
+        </div>
+        <div>
+            <select id="productSelect">
+                <option value="all">All Products</option>
+                <!-- Products will be inserted here dynamically -->
+            </select>
         </div>
     </div>
 
+    <!-- Grid of Cards for Metrics -->
+    <div class="grid-container" id="metricsGrid">
+        <!-- Cards will be inserted dynamically -->
+    </div>
+
     <script>
-        // Fetch product count and update the dashboard
+        // Fetch product data and metrics
         fetch('/api/products')
             .then(response => response.json())
-            .then(products => {
-                const productCount = products.products.length;
-                document.getElementById('productCount').textContent = productCount;
+            .then(data => {
+                const products = data.products;
+                const productSelect = document.getElementById('productSelect');
+
+                // Populate the product dropdown
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.product_id;
+                    option.textContent = product.product_name;
+                    productSelect.appendChild(option);
+                });
+
+                // When the dropdown value changes, refresh the data
+                document.getElementById('dateRange').addEventListener('change', updateDashboard);
+                productSelect.addEventListener('change', updateDashboard);
+
+                // Initial load
+                updateDashboard();
+
+                function updateDashboard() {
+                    const selectedDateRange = document.getElementById('dateRange').value;
+                    const selectedProduct = productSelect.value;
+
+                    // Calculate metrics based on selected date range and product
+                    const metrics = calculateMetrics(products, selectedDateRange, selectedProduct);
+                    renderMetrics(metrics);
+                }
+
+                function calculateMetrics(products, dateRange, productId) {
+                    const metrics = {
+                        profit: 0,
+                        revenue: 0,
+                        loss: 0,
+                        quantitySold: 0,
+                        totalTransactions: 0
+                    };
+
+                    // Filter products if a specific product is selected
+                    const filteredProducts = productId === 'all' ? products : products.filter(p => p.product_id == productId);
+
+                    // Calculate metrics for each product
+                    filteredProducts.forEach(product => {
+                        const buyTransactions = product.buy_transactions;
+                        const sellTransactions = product.sell_transactions;
+
+                        let productProfit = 0;
+                        let productRevenue = 0;
+                        let productLoss = 0;
+                        let productQuantitySold = 0;
+
+                        // Handle buy transactions (e.g., for revenue and cost)
+                        buyTransactions.forEach(transaction => {
+                            // (Optional) You could do specific calculations based on date range here
+                            productRevenue += transaction.quantity * transaction.price;
+                        });
+
+                        // Handle sell transactions (e.g., for profit and losses)
+                        sellTransactions.forEach(transaction => {
+                            productProfit += transaction.quantity * transaction.price;
+                            productQuantitySold += transaction.quantity;
+                        });
+
+                        // Calculate loss or any other custom metric
+                        productLoss = productRevenue - productProfit;
+
+                        metrics.profit += productProfit;
+                        metrics.revenue += productRevenue;
+                        metrics.loss += productLoss;
+                        metrics.quantitySold += productQuantitySold;
+                        metrics.totalTransactions += sellTransactions.length;
+                    });
+
+                    return metrics;
+                }
+
+                function renderMetrics(metrics) {
+                    const grid = document.getElementById('metricsGrid');
+                    grid.innerHTML = '';
+
+                    const metricCards = [
+                        { title: 'Profit', value: metrics.profit },
+                        { title: 'Revenue', value: metrics.revenue },
+                        { title: 'Loss', value: metrics.loss },
+                        { title: 'Quantity Sold', value: metrics.quantitySold },
+                        { title: 'Total Transactions', value: metrics.totalTransactions }
+                    ];
+
+                    metricCards.forEach(metric => {
+                        const card = document.createElement('div');
+                        card.classList.add('card');
+                        card.innerHTML = `
+                        <h3>${metric.title}</h3>
+                        <p>${metric.value}</p>
+                    `;
+                        grid.appendChild(card);
+                    });
+                }
             });
+
     </script>
 
     <!-- Bottom Navigation Bar -->
