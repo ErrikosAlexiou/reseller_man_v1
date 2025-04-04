@@ -1,0 +1,199 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    /* Keep horizontal centering */
+    padding: 20px;
+    min-height: 100vh;
+    /* Ensure the body is at least the height of the viewport */
+}
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 80vw;
+    max-width: 1200px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Remove fixed height that might be preventing scroll */
+}
+
+.filter-section {
+    display: flex;
+    position: relative;
+    /* ADDED THIS LINE */
+    align-items: center;
+    gap: 40px;
+    /* Increase gap between filter elements */
+    margin-bottom: 30px;
+}
+
+.filter-section>div {
+    display: flex;
+    position: relative;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-section label {
+
+    font-size: 1.1em;
+}
+
+.filter-section select,
+.filter-section .dropdown-container .dropdown-button {
+    padding: 10px 15px;
+    /* More padding for better touch/click targets */
+    border: 1px solid #ddd;
+    /* Lighter border */
+    border-radius: 6px;
+    /* Slightly more rounded */
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.filter-section select[multiple] {
+    height: 120px;
+    /* Adjust as needed */
+}
+
+.filter-section .dropdown-container .dropdown-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 200px;
+    /* Adjust as needed */
+}
+
+.filter-section .dropdown-button::after {
+    content: '\25BE';
+    margin-left: 10px;
+    font-size: 0.9em;
+    color: #777;
+}
+
+.filter-section .dropdown-list {
+    position: absolute;
+    top: calc(100% + 5px);
+    /* Position slightly below the button */
+    left: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: none;
+    padding: 10px 0;
+    min-width: 100%;
+}
+
+.filter-section .dropdown-list.open {
+    display: block;
+}
+
+.filter-section .dropdown-list label {
+    display: block;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.filter-section .dropdown-list label:hover {
+    background-color: #f9f9f9;
+}
+
+.filter-section .dropdown-list input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* Adjust minmax as needed */
+    gap: 20px;
+    /* Increase gap between grid items */
+}
+
+.dashboard-card {
+    background-color: #fff;
+    padding: 20px;
+    /* Increase padding inside cards */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    /* Slightly softer shadow */
+    text-align: center;
+    border: 1px solid #eee;
+    /* Add a subtle border */
+}
+
+.dashboard-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    font-weight: 500;
+    /* Slightly bolder font weight */
+    color: #555;
+}
+
+.dashboard-card .value {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+#graphs h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+#downloadButton {
+    padding: 12px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    /* Add a smooth transition for hover effect */
+}
+
+#downloadButton:hover {
+    background-color: #218838;
+}
+
+
+#graphs {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 1px solid #eee;
+}
+
+.graph-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+
+.graph-container h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #555;
+    text-align: center;
+}
